@@ -17,7 +17,7 @@ class UnsortedListSt : public ST<Item, Key> {
   int n;
  public:
   UnsortedListSt (void):head(0){}
-  //~UnsortedListSt ();
+  ~UnsortedListSt ();
   int count (void) {return n;}
   void insert (Item item);
   Item search (Key k);
@@ -25,6 +25,15 @@ class UnsortedListSt : public ST<Item, Key> {
   Item select (int k);
   void visit (void);
 };
+
+template <class Item, class Key>
+UnsortedListSt<Item, Key>::~UnsortedListSt () {
+  while (head) {
+    Link tmp = head;
+    head = tmp->next;
+    delete tmp;
+  }
+}
 
 template <class Item, class Key>
 void UnsortedListSt<Item, Key>::insert (Item item) {
@@ -60,6 +69,7 @@ void UnsortedListSt<Item, Key>::remove (Item item) {
       delete rm;
       break;
     }
+    tmp = tmp->next;
   }  
 }
 

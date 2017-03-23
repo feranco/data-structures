@@ -19,10 +19,22 @@ void testST (ST<Item,Key>& st) {
   Item x = st.search(item.key());
   std::cout << "search hit: " << x;
   st.remove(x);
-  std::cout << "HHH";
   x = st.search(x.key());
   std::cout << "search miss: " << x;
   st.visit();
+}
+
+#include "static_st.h"
+
+void testStaticST (void) {
+  StData a[sz];
+  for (int i = 0; i < sz; ++i) {
+    a[i].rand();
+  }
+  StaticSt<StData,Key> st(a, sz);
+  st.visit();
+  StData x = st.search(a[8].key());
+  std::cout << "search hit: " << x;
 }
 
 #endif

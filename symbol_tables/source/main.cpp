@@ -5,14 +5,15 @@ using namespace std;
 #include <cstdlib>
 #include "symbol_table_data.h"
 #include "symbol_table_test.h"
-#include "unsorted_list_st.h"
+#include "bst_st.h"
 
 int main(int argc, char* argv[])
 {
 
-  UnsortedListSt<StData,Key> st;
+  BstSt<StData,Key> st;
 
   testST(st);
+  //testStaticST();
   return 0;
 }
 
