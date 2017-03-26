@@ -10,7 +10,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 
-  BstSt<StData,Key> st;
+  BstSt<StData,Key> st(true);
 
   testST(st);
   //testStaticST();
@@ -18,3 +18,4 @@ int main(int argc, char* argv[])
 }
 
  
+
