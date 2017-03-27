@@ -17,22 +17,27 @@ class BstSt : public ST<Item, Key> {
   Link head;
   bool recursive;
   Item null_item;
-  int n;
   
-  void insertI (Item item);
+  //recursive 
   void insertR (Link& v, Item item);
   void insertRootR (Link& v, Item item);
-  void insertRootI (Item item);
-  Item searchI (Key k) ;
   Item searchR (Link v, Key k);
   void visitR (Link v);
+  void removeR (Link& v, Item item);
+  Item selectR (Link v, int k);
   void rotLeft (Link& v);
   void rotRight (Link& v);
-  void swapSize (Link a, Link b);
   int  size (Link v);
-  Item selectI (int k);
-  Item selectR (Link v, int k);
+  void swapSize (Link a, Link b);
   void partitionR (Link& v, int k);
+  void joinLRChild (Link& v);
+  void joinR (Link& headL, Link headR);
+
+  //iterative
+  void insertI (Item item);
+  void insertRootI (Item item);
+  Item searchI (Key k);
+  Item selectI (int k);
 
   //for debug
   void dumpIntNode(std::ostream& os, Item v, int h) const;
@@ -40,14 +45,14 @@ class BstSt : public ST<Item, Key> {
   void dump(std::ostream& os, Link t, int h) const;
 public:
   BstSt (bool rec = true):head(0), recursive(rec){}
-  int count (void) {return n;}
+  int count (void) {return head->size;}
   void insert (Item item);
   void insertRoot (Item item);
   Item search (Key k);
   void remove (Item item);
   Item select (int k);
   void visit (void);
-  void operator+=(BstSt<Item, Key>& rhs);
+  void join(BstSt<Item, Key>& rhs);
 
   friend std::ostream& operator<< (std::ostream& os, const BstSt& rhs) {
     rhs.dump(os, rhs.head, 0);
@@ -55,32 +60,41 @@ public:
   }
 };
 
-void BstSt<Item, Key>::operator+=(BstSt<Item, Key>& rhs) {
-
+template <class Item, class Key>
+void BstSt<Item, Key>::join(BstSt<Item, Key>& rhs) {
+  joinR(head, rhs.head);
 }
 
-//print internal node
 template <class Item, class Key>
-void BstSt<Item, Key>::dumpIntNode(std::ostream& os, Item v, int h) const {
-  for (int i = 0; i < h; ++i) os << "  ";
-  os << v.key() << std::endl;
+  void BstSt<Item, Key>::joinR(Link& headL, Link headR) {
+  if (!headR) return;
+  if (!headL) { headL = headR; return;}
+  insertRootR(headL, headR->item);
+  joinR(headL->left, headR->left);
+  joinR(headL->right, headR->right);
+  delete(headR);
 }
 
-//print external node
+#if 0
+//with references
 template <class Item, class Key>
-void BstSt<Item, Key>::dumpExtNode(std::ostream& os, int h) const {
-  for (int i = 0; i < h; ++i) os << "  ";
-  os << '*' << std::endl;
+  Link BstSt<Item, Key>::joinR(Link headL, Link headR) {
+  if (!headR) return headL;//return
+  if (!headL) return headR;//headL = headR;
+  insertRootR(headL, headR->item);
+  headL->left = joinR(headL->left, headR->left);
+  headL->right = joinR(headL->right, headR->right);
+  delete(headR);
+  return headL;
 }
+#endif
 
-//print (sub)tree
+//public
+
 template <class Item, class Key>
-void BstSt<Item, Key>::dump(std::ostream& os, Link t, int h) const {
-  if (t == 0) { dumpExtNode(os, h); return; }
-
-  dump(os, t->right, h + 3);
-  dumpIntNode(os, t->item, h);
-  dump(os, t->left, h + 3);
+void BstSt<Item, Key>::insert (Item item) {
+  if (recursive) return insertR(head, item);
+  else return insertI(item);
 }
 
 template <class Item, class Key>
@@ -90,30 +104,38 @@ Item BstSt<Item, Key>::search (Key k) {
 }
 
 template <class Item, class Key>
+void BstSt<Item, Key>::remove (Item item) {
+  removeR(head, item);
+}
+
+template <class Item, class Key>
+Item BstSt<Item, Key>::select (int k) {
+  if (recursive) return selectR(head, k);
+  else return selectI(k);
+}
+
+template <class Item, class Key>
+void BstSt<Item, Key>::visit (void) {
+  //first sort the list and then print nodes
+  //std::cout << *this;
+  visitR(head);
+}
+
+template <class Item, class Key>
+void BstSt<Item, Key>::insertRoot (Item item) {
+  if (recursive) insertRootR(head, item);
+  else insertRootI(item);
+}
+
+//recursive
+
+template <class Item, class Key>
 Item BstSt<Item, Key>::searchR (Link v, Key k) {
   if (v == 0) return null_item;
   Key v_key = v->item.key();
   if (v_key == k) return v->item;
   if (v_key >  k) return searchR(v->left, k);
   else return searchR(v->right, k); 
-}
-
-template <class Item, class Key>
-Item BstSt<Item, Key>::searchI (Key k) {
-  Link tmp = head;
-  while (tmp) {
-     Key v_key = tmp->item.key();
-     if (v_key == k) return tmp->item;
-     if (v_key >  k) tmp = tmp->left;
-     else tmp = tmp->right; 
-  }
-  return null_item;
-}
-
-template <class Item, class Key>
-void BstSt<Item, Key>::insert (Item item) {
-  if (recursive) return insertR(head, item);
-  else return insertI(item);
 }
 
 template <class Item, class Key>
@@ -128,47 +150,16 @@ void BstSt<Item, Key>::insertR (Link& v, Item item) {
 }
 
 template <class Item, class Key>
-void BstSt<Item, Key>::insertI (Item item) {
-
-  if (!head) head =  new Node(item);
-  
-  Link tmp = head;
-  Key k = item.key();
-  
-  while (tmp) {
-     if (tmp->item.key() >  k) {
-       if (!tmp->left) {
-	 tmp->left = new Node(item);
-	 break;
-       }
-       tmp = tmp->left;
-     }
-     else {
-        if (!tmp->right) {
-	 tmp->right = new Node(item);
-	 break;
-       }
-       tmp = tmp->right;
-     }
-     tmp->size++;
-  }
-}
-
-template <class Item, class Key>
-void BstSt<Item, Key>::remove (Item item) {
-  removeR(Link& v, Item, item);
-}
-
-template <class Item, class Key>
 void BstSt<Item, Key>::removeR (Link& v, Item item) {
   if (v == 0) return;//item is not in the ST
   if (v->item.key() == item.key()) {
     Link tmp = v;
+    std::cout << tmp->item.key() << std::endl;
     joinLRChild(v);
     delete tmp;
     return;//no need of this return putting the if at the end
   }
-  if (v->item.key() < item.key()) removeR(v->left, item);
+  if (v->item.key() > item.key()) removeR(v->left, item);
   else removeR(v->right, item); 
 }
 
@@ -199,9 +190,19 @@ void BstSt<Item, Key>::partitionR (Link& v, int k) {
 }
 
 template <class Item, class Key>
-Item BstSt<Item, Key>::select (int k) {
-  if (recursive) Return selectR(head, k);
-  else return selectI(k);
+void BstSt<Item, Key>::insertRootR (Link& v, Item item) {
+  if (v == 0) {
+    v = new Node(item);
+    return;
+  }
+  if (v->item.key() >  item.key()) {
+    insertRootR(v->left, item);
+    rotRight(v);
+  }
+  else {
+    insertRootR(v->right, item);
+    rotLeft(v);
+  }
 }
 
 template <class Item, class Key>
@@ -210,6 +211,80 @@ Item BstSt<Item, Key>::selectR (Link v, int k) {
   int sz = size(v->left);
   if (sz > k) return selectR(v->left, k);
   else return selectR(v->right, k-sz-1);
+}
+
+template <class Item, class Key>
+void BstSt<Item, Key>::visitR (Link v) {
+  if(!v) return;
+  visitR(v->left);
+  std::cout << v->item;
+  visitR(v->right);
+}
+
+//left rotation: swap v with its right child r
+//v become the left child of r
+//the left child of r become the right child of v
+//IMPORTANT: not swap instruction 2 with 3
+template <class Item, class Key>
+void BstSt<Item, Key>::rotLeft  (Link& v) {
+  Link tmp = v->right;//save r
+  v->right = tmp->left;//left child of r become the right child of v
+  tmp->left = v;//v become left child of r
+  v = tmp;//swap
+  swapSize(v, tmp);
+}
+
+//right rotation: swap v with its left child l
+//v become the right child of l
+//the right child of l become the left child of v
+template <class Item, class Key>
+void BstSt<Item, Key>::rotRight  (Link& v) {
+  Link tmp = v->left;
+  v->left = tmp->right;
+  tmp->right = v;
+  v = tmp;
+  swapSize(v, tmp);
+}
+
+//iterative
+
+template <class Item, class Key>
+Item BstSt<Item, Key>::searchI (Key k) {
+  Link tmp = head;
+  while (tmp) {
+     Key v_key = tmp->item.key();
+     if (v_key == k) return tmp->item;
+     if (v_key >  k) tmp = tmp->left;
+     else tmp = tmp->right; 
+  }
+  return null_item;
+}
+
+template <class Item, class Key>
+void BstSt<Item, Key>::insertI (Item item) {
+
+  if (!head) head =  new Node(item);
+  
+  Link tmp = head;
+  Key k = item.key();
+  
+  while (tmp) {
+     if (tmp->item.key() >  k) {
+       if (!tmp->left) {
+	 tmp->left = new Node(item);
+	 break;
+       }
+       tmp = tmp->left;
+     }
+     else {
+        if (!tmp->right) {
+	 tmp->right = new Node(item);
+	 break;
+       }
+       tmp = tmp->right;
+     }
+     tmp->size++;
+  }
 }
 
 template <class Item, class Key>
@@ -226,80 +301,6 @@ Item BstSt<Item, Key>::selectI (int k) {
     }
   }
   return tmp->item;
-}
-
-template <class Item, class Key>
-void BstSt<Item, Key>::visit (void) {
-  //first sort the list and then print nodes
-  //std::cout << *this;
-  visitR(head);
-}
-
-template <class Item, class Key>
-void BstSt<Item, Key>::visitR (Link v) {
-  if(!v) return;
-  visitR(v->left);
-  std::cout << v->item;
-  visitR(v->right);
-}
-
-//left rotation: swap v with its right child r
-//v become the left child of r
-//the left child of r become the right child of v
-template <class Item, class Key>
-void BstSt<Item, Key>::rotLeft  (Link& v) {
-  Link tmp = v->right;//save r
-  tmp->left = v;//v become left child of r
-  v->right = tmp->left;//left child of r become the right child of v
-  v = tmp;//swap
-  swapSize(v, tmp);
-}
-
-//right rotation: swap v with its left child l
-//v become the right child of l
-//the right child of l become the left child of v
-template <class Item, class Key>
-void BstSt<Item, Key>::rotRight  (Link& v) {
-  Link tmp = v->left;
-  tmp->right = v;
-  v->left = tmp->right;
-  v = tmp;
-  swapSize(v, tmp);
-}
-
-template <class Item, class Key>
-void BstSt<Item, Key>::swapSize (Link a, Link b) {
-  int size = a->item.size;
-  a->item.size = b->item.size;
-  b->item.size = size;
-}
-
-template <class Item, class Key>
-int BstSt<Item, Key>::size (Link v) {
-  if (!v) return 0;
-  else return v->size;
-}
-
-template <class Item, class Key>
-void BstSt<Item, Key>::insertRoot (Item item) {
-  if (recursive) insertRootR(head, item);
-  else insertRootI(item);
-}
-
-template <class Item, class Key>
-void BstSt<Item, Key>::insertRootR (Link& v, Item item) {
-  if (v == 0) {
-    v = new Node(item);
-    return;
-  }
-  if (v->item.key() >  item.key()) {
-    insertRoot(v->left, item);
-    rotRight(v);
-  }
-  else {
-    insertR(v->right, item);
-    rotLeft(v);
-  }
 }
 
 template <class Item, class Key>
@@ -336,6 +337,45 @@ void BstSt<Item, Key>::insertRootI (Item item) {
     if (tmp->item.key() < k) rotateLeft(tmp);
     else rotateRight(tmp);
   }
+}
+
+//utility
+
+template <class Item, class Key>
+void BstSt<Item, Key>::swapSize (Link a, Link b) {
+  int size = a->size;
+  a->size = b->size;
+  b->size = size;
+}
+
+template <class Item, class Key>
+int BstSt<Item, Key>::size (Link v) {
+  if (!v) return 0;
+  else return v->size;
+}
+
+//print internal node
+template <class Item, class Key>
+void BstSt<Item, Key>::dumpIntNode(std::ostream& os, Item v, int h) const {
+  for (int i = 0; i < h; ++i) os << "  ";
+  os << v.key() << std::endl;
+}
+
+//print external node
+template <class Item, class Key>
+void BstSt<Item, Key>::dumpExtNode(std::ostream& os, int h) const {
+  for (int i = 0; i < h; ++i) os << "  ";
+  os << '*' << std::endl;
+}
+
+//print (sub)tree
+template <class Item, class Key>
+void BstSt<Item, Key>::dump(std::ostream& os, Link t, int h) const {
+  if (t == 0) { dumpExtNode(os, h); return; }
+
+  dump(os, t->right, h + 3);
+  dumpIntNode(os, t->item, h);
+  dump(os, t->left, h + 3);
 }
 
 #endif

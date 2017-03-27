@@ -8,6 +8,7 @@
 
 const int sz = 10;
 
+//test insert, search and remove
 template <class Item, class Key>
 void testST (ST<Item,Key>& st) {
   StData item;
@@ -22,6 +23,27 @@ void testST (ST<Item,Key>& st) {
   x = st.search(x.key());
   std::cout << "search miss: " << x;
   st.visit();
+}
+
+#include "bst_st.h"
+//test join
+template <class Item, class Key>
+  void testST2 (BstSt<Item,Key>& stA, BstSt<Item,Key>& stB) {
+  StData item;
+  for (int i = 0; i < sz; ++i) {
+    item.rand();
+    if (stA.search(item.key()).null()) stA.insert(item);   
+  }
+  stA.visit();
+  std::cout << "--------" << std::endl;
+  for (int i = 0; i < sz; ++i) {
+    item.rand();
+    if (stB.search(item.key()).null()) stB.insert(item);   
+  }
+  stB.visit();
+  std::cout << "--------" << std::endl;
+  stA.join(stB);
+  stA.visit();
 }
 
 #include "static_st.h"

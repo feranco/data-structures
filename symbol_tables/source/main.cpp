@@ -11,8 +11,9 @@ int main(int argc, char* argv[])
 {
 
   BstSt<StData,Key> st(true);
+  BstSt<StData,Key> stB(true);
 
-  testST(st);
+  testST2(st,stB);
   //testStaticST();
   return 0;
 }
