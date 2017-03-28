@@ -37,7 +37,7 @@ class BT {
 
   int height (void) {return heightR(root);}
   void preorder (void) {if (recursive) preorderR(root); else preorderI();}
-  void inorder (void) {inorderR(root);}
+  void inorder (void) {if (recursive) inorderR(root); else inorderI();}
 
   friend std::ostream& operator<< (std::ostream& os, const BT& rhs) {
     rhs.dump(os, rhs.root, 0);
@@ -113,9 +113,9 @@ void BT<Item>::inorderI (void) {
       s.push(v->left);
       v = v->left;
     }
-    std::cout << s.top();
-    s.pop();
     v = s.top();
+    std::cout << v;
+    //s.pop();
     if (v->right) {
       std::cout << s.top();
       s.pop();

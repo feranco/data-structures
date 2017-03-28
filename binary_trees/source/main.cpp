@@ -6,8 +6,8 @@ int main(int argc, char* argv[])
 {
 
   const char*s = "1100100";
-  const char*l = "cb*ad*e";
-  BT<char> bt(s, l, false);
+  const char*l = "dbacfeg";
+  BT<char> bt(s, l, true);
   std::cout << bt;
   std::cout << "height: " << bt.height() << endl;
   std::cout << "preorder: ";
