@@ -25,7 +25,25 @@ void testST (ST<Item,Key>& st) {
   st.visit();
 }
 
+
+
 #include "bst_st.h"
+
+//test insert, search and remove
+template <class Item, class Key>
+void testSTA (BstSt<Item,Key>& st) {
+  StData item, a, b;
+  for (int i = 0; i < sz; ++i) {
+    item.rand();
+    if (st.search(item.key()).null()) st.insert(item);   
+    if (i == 2) a = item;
+    if (i == 7) b = item;
+  }
+  st.visit();
+  Item anc =  st.lowestAncestor(a.key(),b.key());
+  std::cout << "low anc: "<< a << " " << b << " " << anc;
+}
+
 //test join
 template <class Item, class Key>
   void testST2 (BstSt<Item,Key>& stA, BstSt<Item,Key>& stB) {

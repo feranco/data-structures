@@ -54,11 +54,42 @@ public:
   void visit (void);
   void join(BstSt<Item, Key>& rhs);
 
+  Item lowestAncestor (Key a, Key  b);
+  Item lowestAncestorR (Link v, Key a, Key  b);
+  Item lowestAncestorI (Key a, Key  b);
+
   friend std::ostream& operator<< (std::ostream& os, const BstSt& rhs) {
     rhs.dump(os, rhs.head, 0);
     return os;
-  }
+    }
 };
+
+template <class Item, class Key>
+Item BstSt<Item, Key>::lowestAncestor (Key a, Key  b) {
+  if (recursive) return lowestAncestorR (head, a, b);
+  else return lowestAncestorI(a,b);
+}
+
+template <class Item, class Key>
+Item BstSt<Item, Key>::lowestAncestorR (Link v, Key a, Key  b) {
+  if (a == b) return null_item;
+  Key k = v->item.key();
+  if (a < k && b < k) return lowestAncestorR(v->left, a, b);
+  if (a > k && b > k) return lowestAncestorR(v->right, a, b);
+  return v->item;
+}
+
+template <class Item, class Key>
+Item BstSt<Item, Key>::lowestAncestorI (Key a, Key  b) {
+  Link v = head;
+  while (v) {
+     Key k = v->item.key();
+     if (a < k && b < k) { v = v->left; continue;}
+     if (a > k && b > k) {v = v->right; continue;}
+     return v->item;
+  }
+  return null_item;
+}
 
 template <class Item, class Key>
 void BstSt<Item, Key>::join(BstSt<Item, Key>& rhs) {
@@ -117,8 +148,8 @@ Item BstSt<Item, Key>::select (int k) {
 template <class Item, class Key>
 void BstSt<Item, Key>::visit (void) {
   //first sort the list and then print nodes
-  //std::cout << *this;
-  visitR(head);
+  std::cout << *this;
+  //visitR(head);
 }
 
 template <class Item, class Key>
@@ -263,7 +294,7 @@ Item BstSt<Item, Key>::searchI (Key k) {
 template <class Item, class Key>
 void BstSt<Item, Key>::insertI (Item item) {
 
-  if (!head) head =  new Node(item);
+  if (!head) {head =  new Node(item); return;}
   
   Link tmp = head;
   Key k = item.key();

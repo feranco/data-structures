@@ -10,10 +10,10 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 
-  BstSt<StData,Key> st(true);
-  BstSt<StData,Key> stB(true);
-
-  testST2(st,stB);
+  BstSt<StData,Key> st(false);
+  //BstSt<StData,Key> stB(true);
+  testSTA(st);
+  //testST2(st,stB);
   //testStaticST();
   return 0;
 }
