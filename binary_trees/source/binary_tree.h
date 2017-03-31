@@ -81,9 +81,9 @@ void BT<Item>::preorderR (Link v) {
 template <class Item>
 void BT<Item>::inorderR (Link v) {
   if (!v) return;
-  preorderR(v->left);
+  inorderR(v->left);
   std::cout << v->item << " ";
-  preorderR(v->right);
+  inorderR(v->right);
 }
 
 
@@ -103,6 +103,7 @@ void BT<Item>::preorderI (void) {
   }
 }
 
+//inorder traversal without recursion
 template <class Item>
 void BT<Item>::inorderI (void) {
   std::stack<Link> s;
@@ -113,13 +114,30 @@ void BT<Item>::inorderI (void) {
       s.push(v->left);
       v = v->left;
     }
-    v = s.top();
-    std::cout << v;
-    //s.pop();
-    if (v->right) {
-      std::cout << s.top();
+
+    while (!s.empty()) {
+      v = s.top();
       s.pop();
-      s.push(v->right);
+      std::cout << v;
+      if (v->right) {
+	s.push(v->right);
+	break;
+      }
+    }
+  }
+}
+
+//inorder traversal without recursion
+template <class Item>
+void BT<Item>::postorderI (void) {
+  Link p = 0;//previously visited node
+  std::stack<Link> s;
+  s.push(root);
+  while (!s.empty()) {
+    Link v = s.top();
+    while (v->left) {
+      s.push(v->left);
+      v = v->left;
     }
   }
 }
