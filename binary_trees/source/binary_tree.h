@@ -19,11 +19,13 @@ class BT {
   //iterative
   void preorderI (void);
   void inorderI (void);
+  void postorderI (void);
 
   //recursive
   int heightR (Link v);
   void preorderR (Link v);
   void inorderR (Link v);
+  void postorderR (Link v);
 
   //for debug
   void dumpIntNode(std::ostream& os, Item v, int h) const;
@@ -38,6 +40,7 @@ class BT {
   int height (void) {return heightR(root);}
   void preorder (void) {if (recursive) preorderR(root); else preorderI();}
   void inorder (void) {if (recursive) inorderR(root); else inorderI();}
+  void postorder (void) {if (recursive) postorderR(root); else postorderI();}
 
   friend std::ostream& operator<< (std::ostream& os, const BT& rhs) {
     rhs.dump(os, rhs.root, 0);
@@ -86,6 +89,13 @@ void BT<Item>::inorderR (Link v) {
   inorderR(v->right);
 }
 
+template <class Item>
+void BT<Item>::postorderR (Link v) {
+  if (!v) return;
+  postorderR(v->left);
+  postorderR(v->right);
+  std::cout << v->item << " ";
+}
 
 //iterative
 
@@ -118,7 +128,7 @@ void BT<Item>::inorderI (void) {
     while (!s.empty()) {
       v = s.top();
       s.pop();
-      std::cout << v;
+      std::cout << v->item << " ";
       if (v->right) {
 	s.push(v->right);
 	break;
@@ -129,16 +139,53 @@ void BT<Item>::inorderI (void) {
 
 //inorder traversal without recursion
 template <class Item>
-void BT<Item>::postorderI (void) {
-  Link p = 0;//previously visited node
+void BT<Item>::inorderI (void) {
   std::stack<Link> s;
   s.push(root);
   while (!s.empty()) {
-    Link v = s.top();
-    while (v->left) {
-      s.push(v->left);
-      v = v->left;
+    Link curr = s.top();
+    if (curr->left) {
+      s.push(curr->left);
     }
+    else {
+      std::cout << v->item << " ";
+      s.pop();
+      if (curr->right) {
+	s.push(curr->right);
+      }
+    }
+  }
+}
+
+//postorder traversal without recursion
+template <class Item>
+void BT<Item>::postorderI (void) {
+  Link prev = 0;//previously visited node
+  std::stack<Link> s;
+  s.push(root);
+  while (!s.empty()) {
+    Link curr = s.top();
+    
+    if (!prev || prev->left == curr || prev->right == curr) {
+      if (curr->left) s.push(curr->left);
+      else if (curr->right) s.push(curr->right);
+      else {
+	std::cout << curr->item << " ";
+	s.pop();
+      }
+    }
+    else if (prev == curr->left) {
+      if (curr->right) s.push(curr->right);
+      else {
+	std::cout << curr->item << " ";
+	s.pop();
+      }
+    }
+    else {
+      std::cout << curr->item << " ";
+      s.pop();
+    }
+    prev = curr;
   }
 }
 
