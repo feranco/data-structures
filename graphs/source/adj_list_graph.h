@@ -3,29 +3,20 @@
 
 class Graph {
   struct Node {
-    int item;
+    int v;
     Node* next;
-    Node (int x):item(x), next(0) {};
+    Node (int x):v(x), next(0) {};
   };
   typedef Node* Link;
-  int  n_vertex;
-  Link vertex;
+  int  v, e; //number of vertex and edges
+  Link* adj;
   bool* visited;
 
  public:
-  Graph (int n): n_vertex(n) {vertex = new Node[n]; visited = new bool[n];}
-  addEdge (int v1, int v2);
+  Graph (int n): v(n), e(0) {adj = new Link[n]; visited = new bool[n];}
+  void addEdge (int v1, int v2);
   
 };
 
-Graph::addEdge (int v1, int v2){
-  Link tmp = vertex[v1];
-  vertex[v1] = new Node(v2);
-  vertex[v1]->next = tmp;
-
-  Link tmp = vertex[v2];
-  vertex[v2] = new Node(v2);
-  vertex[v2]->next = tmp;
-}
 
 #endif
