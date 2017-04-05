@@ -1,6 +1,8 @@
 #ifndef ADJ_LIST_GRAPH_H
 #define ADJ_LIST_GRAPH_H
 
+#include <iostream>
+
 class Graph {
   struct Node {
     int v;
@@ -10,12 +12,17 @@ class Graph {
   typedef Node* Link;
   int  v, e; //number of vertex and edges
   Link* adj;
-  bool* visited;
+  bool rec;
+
+  bool validateVertex (int v) const;
+  void bfsR (int v, bool visited[]);
 
  public:
-  Graph (int n): v(n), e(0) {adj = new Link[n]; visited = new bool[n];}
+  Graph (int n, bool r = true);
+  Graph(std::ifstream& ifs, bool r = true);
   void addEdge (int v1, int v2);
-  
+  void bfs (int v);
+  friend std::ostream& operator<<(std::ostream& os, const Graph& rhs);
 };
 
 

@@ -1,40 +1,21 @@
 #include "adj_list_graph.h"
-#include <ifstream>
+#include <fstream>
 #include <stdexcept>
 
-Graph (int n): v(n), e(0) {
+Graph::Graph (int n, bool r = true): v(n), e(0), rec(r) {
   adj = new Link[n]; 
-  visited = new bool[n];
-  for (int i = 0; < v; ++i) {
-    adj[i] = 0;
-    visited [i] = false;
-  }
+  for (int i = 0; i < v; ++i) adj[i] = 0;
 }
 
-Graph(std::ifstream& ifs) {
-  try {
-    ifs >> v >> e;
-    if (v <= 0) throw std::invalid_argument("number of vertices in a Graph must be nonnegative");
-    if (e < 0) throw std::invalid_argument("number of edges in a Graph must be nonnegative");
-    adj = new Link[v];
-    int v1, v2;
-    while (ifs >> v1 >> v2) {
+Graph::Graph(std::ifstream& ifs, bool r = true): v(0), e(0), rec(r) {
+  ifs >> v;
+  if (v <= 0) throw std::invalid_argument("number of vertices in a Graph must be nonnegative");
+  adj = new Link[v];
 
-    }
-   
-    int E = in.readInt();
-    if (E < 0) throw new IllegalArgumentException("number of edges in a Graph must be nonnegative");
-    for (int i = 0; i < E; i++) {
-      int v = in.readInt();
-      int w = in.readInt();
-      validateVertex(v);
-      validateVertex(w);
-      addEdge(v, w); 
-    }
-  }
-  catch (NoSuchElementException e) {
-    throw new IllegalArgumentException("invalid input format in Graph constructor", e);
-  }
+  for (int i = 0; i < v; ++i) adj[i] = 0;
+
+  int v1, v2;
+  while (ifs >> v1 >> v2) addEdge(v1,v2);
 }
 
 bool Graph::validateVertex (int v) const{
@@ -52,6 +33,36 @@ void Graph::addEdge (int v1, int v2){
   
   //Add v2->v1
   tmp = adj[v2];
-  adj[v2] = new Node(v2);
+  adj[v2] = new Node(v1);
   adj[v2]->next = tmp;
+
+  ++e;
+}
+
+void Graph::bfs (int v) {
+  if (!validateVertex(v)) return;
+  bool* visited = new bool[this->v];
+  std::cout << "bfs:  ";
+  if (rec) bfsR(v, visited); 
+}
+
+void bfsR (int v, bool visited[]) {
+  if (!visited[v]) {
+    std::cout << v << " ";
+    visited[v] = true;
+  }
+
+  for (auto t = adj[v]; t != 0; t = t->next) {
+    bfsR(t->v, visited);
+  }
+}
+
+std::ostream& operator<<(std::ostream& os, const Graph& rhs) {
+  os << rhs.v << " vertices " << rhs.e << " edges" << "\n";
+  for (int i = 0; i < rhs.v; ++i) {
+    os << i << ": ";
+    for (auto t = rhs.adj[i]; t != 0; t = t->next) os << t->v << " ";
+    os << "\n"; 
+  }
+  return os;
 }
