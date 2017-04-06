@@ -15,12 +15,14 @@ class Graph {
   bool rec;
 
   bool validateVertex (int v) const;
-  void bfsR (int v, bool visited[]);
+  void dfsR (int v, bool visited[]);
+  void dfsI (int v, bool visited[]);
 
  public:
   Graph (int n, bool r = true);
   Graph(std::ifstream& ifs, bool r = true);
   void addEdge (int v1, int v2);
+  void dfs (int v);
   void bfs (int v);
   friend std::ostream& operator<<(std::ostream& os, const Graph& rhs);
 };
