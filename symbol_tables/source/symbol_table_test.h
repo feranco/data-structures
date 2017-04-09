@@ -36,12 +36,12 @@ void testSTA (BstSt<Item,Key>& st) {
   for (int i = 0; i < sz; ++i) {
     item.rand();
     if (st.search(item.key()).null()) st.insert(item);   
-    if (i == 2) a = item;
-    if (i == 7) b = item;
+    //if (i == 2) a = item;
+    //if (i == 7) b = item;
   }
   st.visit();
-  Item anc =  st.lowestAncestor(a.key(),b.key());
-  std::cout << "low anc: "<< a << " " << b << " " << anc;
+  //Item anc =  st.lowestAncestor(a.key(),b.key());
+  //std::cout << "low anc: "<< a << " " << b << " " << anc;
 }
 
 //test join

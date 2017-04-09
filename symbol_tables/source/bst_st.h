@@ -171,11 +171,11 @@ Item BstSt<Item, Key>::searchR (Link v, Key k) {
 
 template <class Item, class Key>
 void BstSt<Item, Key>::insertR (Link& v, Item item) {
-  if (v == 0) {
+  if (!v) {
     v = new Node(item);
     return;
   }
-  if (v->item.key() >  item.key()) insertR(v->left, item);
+  if (item.key() < v->item.key()) insertR(v->left, item);
   else insertR(v->right, item);
   v->size++;
 }
@@ -281,12 +281,12 @@ void BstSt<Item, Key>::rotRight  (Link& v) {
 
 template <class Item, class Key>
 Item BstSt<Item, Key>::searchI (Key k) {
-  Link tmp = head;
-  while (tmp) {
-     Key v_key = tmp->item.key();
-     if (v_key == k) return tmp->item;
-     if (v_key >  k) tmp = tmp->left;
-     else tmp = tmp->right; 
+  Link v = head;
+  while (v) {
+     Key v_key = v->item.key();
+     if (v_key == k) return v->item;
+     if (k < v_key) v = v->left;
+     else v = v->right; 
   }
   return null_item;
 }
@@ -296,26 +296,18 @@ void BstSt<Item, Key>::insertI (Item item) {
 
   if (!head) {head =  new Node(item); return;}
   
-  Link tmp = head;
+  Link v = head;
+  Link p = 0;
   Key k = item.key();
   
-  while (tmp) {
-     if (tmp->item.key() >  k) {
-       if (!tmp->left) {
-	 tmp->left = new Node(item);
-	 break;
-       }
-       tmp = tmp->left;
-     }
-     else {
-        if (!tmp->right) {
-	 tmp->right = new Node(item);
-	 break;
-       }
-       tmp = tmp->right;
-     }
-     tmp->size++;
+  while (v) {
+     v->size++;
+     p = v;
+     if (k < v->item.key()) v = v->left;
+     else v = v->right;
   }
+  if (k < p->item.key()) p->left = new Node(item);
+  else  p->right = new Node(item);
 }
 
 template <class Item, class Key>

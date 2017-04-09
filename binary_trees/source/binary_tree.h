@@ -137,26 +137,6 @@ void BT<Item>::inorderI (void) {
   }
 }
 
-//inorder traversal without recursion
-template <class Item>
-void BT<Item>::inorderI (void) {
-  std::stack<Link> s;
-  s.push(root);
-  while (!s.empty()) {
-    Link curr = s.top();
-    if (curr->left) {
-      s.push(curr->left);
-    }
-    else {
-      std::cout << v->item << " ";
-      s.pop();
-      if (curr->right) {
-	s.push(curr->right);
-      }
-    }
-  }
-}
-
 //postorder traversal without recursion
 template <class Item>
 void BT<Item>::postorderI (void) {
