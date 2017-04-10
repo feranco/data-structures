@@ -120,7 +120,7 @@ template <class Item, class Key>
 }
 #endif
 
-//public
+//public interfaces
 
 template <class Item, class Key>
 void BstSt<Item, Key>::insert (Item item) {
@@ -226,7 +226,7 @@ void BstSt<Item, Key>::insertRootR (Link& v, Item item) {
     v = new Node(item);
     return;
   }
-  if (v->item.key() >  item.key()) {
+  if (item.key() < v->item.key()) {
     insertRootR(v->left, item);
     rotRight(v);
   }
@@ -240,7 +240,7 @@ template <class Item, class Key>
 Item BstSt<Item, Key>::selectR (Link v, int k) {
   if (v->size == k) return v->item;
   int sz = size(v->left);
-  if (sz > k) return selectR(v->left, k);
+  if (k < sz) return selectR(v->left, k);
   else return selectR(v->right, k-sz-1);
 }
 
@@ -328,37 +328,28 @@ Item BstSt<Item, Key>::selectI (int k) {
 
 template <class Item, class Key>
 void BstSt<Item, Key>::insertRootI (Item item) {
-  //first node
-  if (!head) head =  new Node(item);
-  
+
+  if (!head) {head =  new Node(item); return;}
+
   std::stack<Link> s;
-  Link tmp = head;
+  Link v = head;
+  Link p = 0;
   Key k = item.key();
   
-  while (tmp) {
-     if (tmp->item.key() >  k) {
-       if (!tmp->left) {
-	 tmp->left = new Node(item);
-	 break;
-       }
-       s.push(tmp);
-       tmp = tmp->left;
-     }
-     else {
-        if (!tmp->right) {
-	 tmp->right = new Node(item);
-	 break;
-       }
-       s.push(tmp);
-       tmp = tmp->right;
-     } 
+  while (v) {
+     v->size++;
+     p = v;
+     if (k < v->item.key()) v = v->left;
+     else v = v->right;
   }
+  if (k < p->item.key()) p->left = new Node(item);
+  else  p->right = new Node(item);
 
-  while (s.empty()) {
-    tmp = s.top();
+  while (!s.empty()) {
+    v = s.top();
     s.pop();
-    if (tmp->item.key() < k) rotateLeft(tmp);
-    else rotateRight(tmp);
+    if (k < v->item.key()) rotRight(v);
+    else rotLeft(v);
   }
 }
 
