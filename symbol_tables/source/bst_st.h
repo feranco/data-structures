@@ -181,19 +181,36 @@ void BstSt<Item, Key>::insertR (Link& v, Item item) {
 }
 
 template <class Item, class Key>
-void BstSt<Item, Key>::removeR (Link& v, Item item) {
-  if (v == 0) return;//item is not in the ST
-  if (v->item.key() == item.key()) {
+  bool BstSt<Item, Key>::removeR (Link& v, Key k) {
+  if (v == 0) return false;//item is not in the ST
+  Key v_key = (v->item.key();
+  if (k == v_key) {
     Link tmp = v;
     std::cout << tmp->item.key() << std::endl;
+    partitionR(v->right, 1);
     joinLRChild(v);
     delete tmp;
-    return;//no need of this return putting the if at the end
+    return true;//no need of this return putting the if at the end
   }
-  if (v->item.key() > item.key()) removeR(v->left, item);
-  else removeR(v->right, item); 
+  if (v->item.key() > item.key()) {
+    if(removeR(v->left, item)) v->size--;
+  }
+  else {
+    if(removeR(v->right, item)) v->size--;
+  }  
 }
 
+template <class Item, class Key>
+void BstSt<Item, Key>::joinLRChild (Link& v) {
+  if (!v->right) {
+    v = v->left;
+    return;
+  }
+  v->right->left = v->left;
+  v = v->right;
+}
+
+#if 0
 template <class Item, class Key>
 void BstSt<Item, Key>::joinLRChild (Link& v) {
   if (!v->right) {
@@ -204,6 +221,7 @@ void BstSt<Item, Key>::joinLRChild (Link& v) {
   v->right->left = v->left;
   v = v->right;
 }
+#endif
 
 template <class Item, class Key>
 void BstSt<Item, Key>::partitionR (Link& v, int k) {
