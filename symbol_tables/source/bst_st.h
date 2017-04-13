@@ -23,15 +23,16 @@ class BstSt : public ST<Item, Key> {
   void insertRootR (Link& v, Item item);
   Item searchR (Link v, Key k);
   void visitR (Link v);
-  void removeR (Link& v, Item item);
+  bool removeR (Link& v, Key k);
   Item selectR (Link v, int k);
   void rotLeft (Link& v);
   void rotRight (Link& v);
   int  size (Link v);
-  void swapSize (Link a, Link b);
   void partitionR (Link& v, int k);
   void joinLRChild (Link& v);
   void joinR (Link& headL, Link headR);
+  void balanceR (Link& v);
+  void fixSize (Link v);
 
   //iterative
   void insertI (Item item);
@@ -52,6 +53,8 @@ public:
   void remove (Item item);
   Item select (int k);
   void visit (void);
+  void partition (int k) { partitionR(head,k);}
+  void balance (void) {balanceR(head);}
   void join(BstSt<Item, Key>& rhs);
 
   Item lowestAncestor (Key a, Key  b);
@@ -136,7 +139,7 @@ Item BstSt<Item, Key>::search (Key k) {
 
 template <class Item, class Key>
 void BstSt<Item, Key>::remove (Item item) {
-  removeR(head, item);
+  removeR(head, item.key());
 }
 
 template <class Item, class Key>
@@ -183,21 +186,23 @@ void BstSt<Item, Key>::insertR (Link& v, Item item) {
 template <class Item, class Key>
   bool BstSt<Item, Key>::removeR (Link& v, Key k) {
   if (v == 0) return false;//item is not in the ST
-  Key v_key = (v->item.key();
+  Key v_key = (v->item.key());
   if (k == v_key) {
     Link tmp = v;
-    std::cout << tmp->item.key() << std::endl;
-    partitionR(v->right, 1);
+    std::cout << "remove " << v_key << std::endl;
+    partitionR(v->right, 0);
+    if (v->right) this->dump(std::cout, v->right, 0);
     joinLRChild(v);
     delete tmp;
     return true;//no need of this return putting the if at the end
   }
-  if (v->item.key() > item.key()) {
-    if(removeR(v->left, item)) v->size--;
+  if (v_key > k) {
+    if(removeR(v->left, k)) { v->size--; return true;}
   }
   else {
-    if(removeR(v->right, item)) v->size--;
+    if(removeR(v->right, k)) {v->size--; return true;}
   }  
+  return false;
 }
 
 template <class Item, class Key>
@@ -225,17 +230,25 @@ void BstSt<Item, Key>::joinLRChild (Link& v) {
 
 template <class Item, class Key>
 void BstSt<Item, Key>::partitionR (Link& v, int k) {
-  if (!v || k == 0) return;
-  if (v->size == k) return;//no need of this return putting the if at the end
-  int sz = size(v->left);
-  if (sz > k) {
+  //if (!v || k == 0) return;
+  int l_size = size(v->left);
+  if (l_size+1 == k) return;
+  if (k <= l_size) {
     partitionR(v->left, k);
     rotRight(v);
   }
   else {
-    partitionR(v->right, k-sz-1);
+    partitionR(v->right, k-l_size-1);
     rotLeft(v);
   }
+}
+
+template <class Item, class Key>
+void BstSt<Item, Key>::balanceR (Link& v) {
+  if (size(v) <= 1) return;
+  partitionR(v, size(v)/2 + 1);
+  balanceR(v->left);
+  balanceR(v->right);
 }
 
 template <class Item, class Key>
@@ -254,12 +267,17 @@ void BstSt<Item, Key>::insertRootR (Link& v, Item item) {
   }
 }
 
+//traverse recursively the tree checking the left subtree size:
+//1) if left subtree size + 1 is equal to k, then the current node is the k-th
+//2) if left subtree size is >= k, then the k-th node is in the left subtree
+//3) if left subtree size is < k, then the k-th node is in the right subtree
 template <class Item, class Key>
 Item BstSt<Item, Key>::selectR (Link v, int k) {
-  if (v->size == k) return v->item;
-  int sz = size(v->left);
-  if (k < sz) return selectR(v->left, k);
-  else return selectR(v->right, k-sz-1);
+  if (!v) return null_item; //not necessary if k is checked against the tree size in the wrapper function
+  int l_size = size(v->left);
+  if (l_size + 1 == k) return v->item;
+  if (k <= l_size) return selectR(v->left, k);
+  else  return selectR(v->right, k-sz-1);
 }
 
 template <class Item, class Key>
@@ -280,7 +298,8 @@ void BstSt<Item, Key>::rotLeft  (Link& v) {
   v->right = tmp->left;//left child of r become the right child of v
   tmp->left = v;//v become left child of r
   v = tmp;//swap
-  swapSize(v, tmp);
+  fixSize(v->left);
+  fixSize(v);
 }
 
 //right rotation: swap v with its left child l
@@ -292,7 +311,8 @@ void BstSt<Item, Key>::rotRight  (Link& v) {
   v->left = tmp->right;
   tmp->right = v;
   v = tmp;
-  swapSize(v, tmp);
+  fixSize(v->right);
+  fixSize(v);
 }
 
 //iterative
@@ -330,18 +350,20 @@ void BstSt<Item, Key>::insertI (Item item) {
 
 template <class Item, class Key>
 Item BstSt<Item, Key>::selectI (int k) {
-  Link tmp = head;
-  while (size(tmp) != k) {
-    int sz = size(tmp->left);
-    if (sz > k) {
-      tmp = tmp->left;
+  Link v = head;
+  int l_size = size(v->left);
+
+  while (l_size+1 != k) {
+    if (l_size >= k) {
+      v = v->left;
     }
     else {
-      tmp = tmp->right;
-      k = k - sz -1;
+      v = v->right;
+      k = k - l_size -1;
     }
+    l_size = size(v->left);
   }
-  return tmp->item;
+  return v->item;
 }
 
 template <class Item, class Key>
@@ -374,10 +396,8 @@ void BstSt<Item, Key>::insertRootI (Item item) {
 //utility
 
 template <class Item, class Key>
-void BstSt<Item, Key>::swapSize (Link a, Link b) {
-  int size = a->size;
-  a->size = b->size;
-  b->size = size;
+void BstSt<Item, Key>::fixSize (Link v) {
+  v->size = size(v->left) + size(v->right) + 1;
 }
 
 template <class Item, class Key>

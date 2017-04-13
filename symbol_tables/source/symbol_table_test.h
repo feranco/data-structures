@@ -6,7 +6,7 @@
 #include "symbol_table_data.h"
 #include "symbol_table.h"
 
-const int sz = 10;
+const int sz = 11;
 
 //test insert, search and remove
 template <class Item, class Key>
@@ -33,13 +33,36 @@ void testST (ST<Item,Key>& st) {
 template <class Item, class Key>
 void testSTA (BstSt<Item,Key>& st) {
   StData item, a, b;
-  for (int i = 0; i < sz; ++i) {
+  for (int i = 0; i <= sz; ++i) {
     item.rand();
     if (st.search(item.key()).null()) st.insert(item);   
-    //if (i == 2) a = item;
+    if (i == 2) a = item;
     //if (i == 7) b = item;
   }
   st.visit();
+  
+  std::cout << "Test selection: " << "\n";
+  for (int i = 1; i <= 10; ++i) {
+    b = st.select(i);
+    std::cout << b;
+  }
+  
+  std::cout << "Test partition: " << "\n";
+  for (int i = 1; i <= sz; ++i) {
+    std::cout << i << std::endl;
+    st.partition(i);
+  }
+  st.visit();
+
+  std::cout << "Test balance: " << "\n";
+  st.balance();
+  std::cout << "--------" << std::endl;
+  st.visit();
+  
+  
+  //st.remove(a);
+  //std::cout << "--------" << std::endl;
+  //st.visit();
   //Item anc =  st.lowestAncestor(a.key(),b.key());
   //std::cout << "low anc: "<< a << " " << b << " " << anc;
 }
