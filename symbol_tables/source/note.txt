@@ -1,0 +1,51 @@
+#if 0
+//with references
+template <class Item, class Key>
+void BstSt<Item, Key>::joinR(Link& headL, Link headR) {
+	if (!headR) return;
+	if (!headL) { headL = headR; return; }
+	insertRootR(headL, headR->item);
+	joinR(headL->left, headR->left);
+	joinR(headL->right, headR->right);
+	delete(headR);
+}
+#endif
+
+#if 0
+//the same as the above but less elegant, need bool
+//to understand if the remove was successfull and
+//update accordingly the size of nodes in the path from the removed one
+//to the root
+template <class Item, class Key>
+  bool BstSt<Item, Key>::removeR (Link& v, Key k) {
+  if (v == 0) return false;//item is not in the ST
+  Key v_key = (v->item.key());
+  if (k == v_key) {
+    Link tmp = v;
+    std::cout << "remove " << v_key << std::endl;
+    partitionR(v->right, 1);
+    //if (v->right) this->dump(std::cout, v->right, 0);
+    v = joinLRChild(v->left, v->right);
+    delete tmp;
+    return true;//no need of this return putting the if at the end
+  }
+  if (v_key > k) {
+    if(removeR(v->left, k)) { v->size--; return true;}
+  }
+  else {
+    if(removeR(v->right, k)) {v->size--; return true;}
+  }  
+  return false;
+}
+#endif
+
+#if 0
+template <class Item, class Key>
+void BstSt<Item, Key>::joinLRChild (Link& v) {
+  if (!v->right) {
+    v = v->left;
+    return;
+  }
+  v->right->left = v->left;
+  v = v->right;
+}

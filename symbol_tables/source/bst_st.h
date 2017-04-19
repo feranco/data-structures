@@ -23,14 +23,14 @@ class BstSt : public ST<Item, Key> {
   void insertRootR (Link& v, Item item);
   Item searchR (Link v, Key k);
   void visitR (Link v);
-  bool removeR (Link& v, Key k);
+  void removeR (Link& v, Key k);
   Item selectR (Link v, int k);
   void rotLeft (Link& v);
   void rotRight (Link& v);
   int  size (Link v);
   void partitionR (Link& v, int k);
-  void joinLRChild (Link& v);
-  void joinR (Link& headL, Link headR);
+  Link joinLRChild (Link a, Link b);
+  Link joinR (Link headL, Link headR);
   void balanceR (Link& v);
   void fixSize (Link v);
 
@@ -96,32 +96,21 @@ Item BstSt<Item, Key>::lowestAncestorI (Key a, Key  b) {
 
 template <class Item, class Key>
 void BstSt<Item, Key>::join(BstSt<Item, Key>& rhs) {
-  joinR(head, rhs.head);
+	head = joinR(head, rhs.head);
 }
 
-template <class Item, class Key>
-  void BstSt<Item, Key>::joinR(Link& headL, Link headR) {
-  if (!headR) return;
-  if (!headL) { headL = headR; return;}
-  insertRootR(headL, headR->item);
-  joinR(headL->left, headR->left);
-  joinR(headL->right, headR->right);
-  delete(headR);
-}
-
-#if 0
 //with references
 template <class Item, class Key>
-  Link BstSt<Item, Key>::joinR(Link headL, Link headR) {
-  if (!headR) return headL;//return
-  if (!headL) return headR;//headL = headR;
-  insertRootR(headL, headR->item);
-  headL->left = joinR(headL->left, headR->left);
-  headL->right = joinR(headL->right, headR->right);
-  delete(headR);
-  return headL;
+typename BstSt<Item, Key>::Link BstSt<Item, Key>::joinR(Link headL, Link headR) {
+	if (!headR) return headL;
+	if (!headL) return headR;
+	insertRootR(headR, headL->item);
+	headR->left = joinR(headL->left, headR->left);
+	headR->right = joinR(headL->right, headR->right);
+	delete(headL);
+	fixSize(headR);//necessary because the recursive insertRoot modify headR size 
+	return headR;
 }
-#endif
 
 //public interfaces
 
@@ -183,39 +172,30 @@ void BstSt<Item, Key>::insertR (Link& v, Item item) {
   v->size++;
 }
 
+//put the successor of the node to be deleted as root of the right subtree
+//join the left and the right subtrees and then delete
 template <class Item, class Key>
-  bool BstSt<Item, Key>::removeR (Link& v, Key k) {
-  if (v == 0) return false;//item is not in the ST
+  void BstSt<Item, Key>::removeR(Link& v, Key k) {
+  if (v == 0) return;//item is not in the ST
   Key v_key = (v->item.key());
+  if (k < v_key) removeR(v->left, k);
+  if (k > v_key) removeR(v->right, k);
   if (k == v_key) {
     Link tmp = v;
-    std::cout << "remove " << v_key << std::endl;
-    partitionR(v->right, 0);
-    if (v->right) this->dump(std::cout, v->right, 0);
-    joinLRChild(v);
+    partitionR(v->right, 1);
+    v = joinLRChild(v->left, v->right);
     delete tmp;
-    return true;//no need of this return putting the if at the end
   }
-  if (v_key > k) {
-    if(removeR(v->left, k)) { v->size--; return true;}
-  }
-  else {
-    if(removeR(v->right, k)) {v->size--; return true;}
-  }  
-  return false;
+  fixSize(v);
 }
 
 template <class Item, class Key>
-void BstSt<Item, Key>::joinLRChild (Link& v) {
-  if (!v->right) {
-    v = v->left;
-    return;
-  }
-  v->right->left = v->left;
-  v = v->right;
+typename BstSt<Item, Key>::Link BstSt<Item, Key>::joinLRChild (Link a, Link b) {
+  if (!b) return a;
+  b->left = a;
+  return b;
 }
 
-#if 0
 template <class Item, class Key>
 void BstSt<Item, Key>::joinLRChild (Link& v) {
   if (!v->right) {
@@ -230,7 +210,7 @@ void BstSt<Item, Key>::joinLRChild (Link& v) {
 
 template <class Item, class Key>
 void BstSt<Item, Key>::partitionR (Link& v, int k) {
-  //if (!v || k == 0) return;
+  if (!v) return;
   int l_size = size(v->left);
   if (l_size+1 == k) return;
   if (k <= l_size) {
@@ -277,7 +257,7 @@ Item BstSt<Item, Key>::selectR (Link v, int k) {
   int l_size = size(v->left);
   if (l_size + 1 == k) return v->item;
   if (k <= l_size) return selectR(v->left, k);
-  else  return selectR(v->right, k-sz-1);
+  else  return selectR(v->right, k-l_size-1);
 }
 
 template <class Item, class Key>

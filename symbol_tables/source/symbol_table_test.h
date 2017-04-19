@@ -49,7 +49,6 @@ void testSTA (BstSt<Item,Key>& st) {
   
   std::cout << "Test partition: " << "\n";
   for (int i = 1; i <= sz; ++i) {
-    std::cout << i << std::endl;
     st.partition(i);
   }
   st.visit();
@@ -60,8 +59,8 @@ void testSTA (BstSt<Item,Key>& st) {
   st.visit();
   
   
-  //st.remove(a);
-  //std::cout << "--------" << std::endl;
+  st.remove(a);
+  std::cout << "--------" << std::endl;
   //st.visit();
   //Item anc =  st.lowestAncestor(a.key(),b.key());
   //std::cout << "low anc: "<< a << " " << b << " " << anc;
