@@ -1,5 +1,14 @@
-template <class Item, class Key>
+#include <list>
+#include <vector>
+
+using std::list;
+using std::vector;
+
+template <typename T, typename Key>
 class HashTable {
+  vector<list<T>> hashTable;
+  size_t size = 0;
+/*
   struct Node {
     Item item;
     Node *next;
@@ -9,18 +18,22 @@ class HashTable {
   typedef Node* Link;
   Link* ht;
   int size;
-
+*/
  public:
-  HashTable (int n);
+  HashTable () {}
+  HashTable (size_t n);
   Item search(Key k);
   void insert(Item item);
 };
 
-template <class Item, Key>
-HashTable<Item>::HashTable(int n) {
+template <typename Item, typename Key>
+HashTable<T,Key>::HashTable(unsigned int size) {
+hashTable.resize(size);
+/*
   size = n;
   ht = new Link[n];
   for (int i = 0; i < n; ++i) ht[i] = 0;
+  */
 }
 
 template <class Item, Key>
