@@ -4,9 +4,10 @@
 using std::list;
 using std::vector;
 
-template <typename T, typename Key>
+template <typename Key, typename T>
 class HashTable {
-  vector<list<T>> hashTable;
+  typedef pair<const Key, T> valueType;
+  vector<list<valueType>> hashTable;
   size_t size = 0;
 /*
   struct Node {
@@ -37,8 +38,8 @@ HashTable<T,Key>::HashTable(unsigned int size) {
   */
 }
 
-template <class Item, Key>
-Item HashTable<Item, Key>::search(Key k) {
+template <typename T, typename Key>
+T HashTable<Item, Key>::search(Key k) {
   int h = hash(k, size);
   Link t = ht[h];
   while (!t) {
@@ -49,7 +50,7 @@ Item HashTable<Item, Key>::search(Key k) {
 }
 
 template <typename T, typename Key>
-iterator HashTable<T, Key>::insert(T value) {
+list<T>::iterator HashTable<T, Key>::insert(T value) {
   int h = hash(item.key(), size);
   hashTable[h].push_front(value);
   return hashTable[h].begin();
