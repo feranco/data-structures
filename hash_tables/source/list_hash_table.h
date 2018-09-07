@@ -21,11 +21,15 @@ class HashTable {
   int size;
 */
  public:
+  typedef HashTable::iterator iterator;
+  iterator begin() noexcept { return hashTable.begin(); }
+  inline iterator end() noexcept { return hashTable.end(); }
+  
   HashTable () {}
   HashTable (size_t n);
   Item search(Key k);
-  iterator insert(T value);
-  void insert(Item item);
+  iterator insert(k, T value);
+  //void insert(Key k, T value);
 };
 
 template <typename Item, typename Key>
@@ -50,7 +54,7 @@ T HashTable<Item, Key>::search(Key k) {
 }
 
 template <typename T, typename Key>
-list<T>::iterator HashTable<T, Key>::insert(T value) {
+iterator HashTable<T, Key>::insert(T value) {
   int h = hash(item.key(), size);
   hashTable[h].push_front(value);
   return hashTable[h].begin();
