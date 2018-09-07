@@ -23,12 +23,13 @@ class HashTable {
   HashTable () {}
   HashTable (size_t n);
   Item search(Key k);
+  iterator insert(T value);
   void insert(Item item);
 };
 
 template <typename Item, typename Key>
 HashTable<T,Key>::HashTable(unsigned int size) {
-hashTable.resize(size);
+  hashTable.resize(size);
 /*
   size = n;
   ht = new Link[n];
@@ -45,6 +46,18 @@ Item HashTable<Item, Key>::search(Key k) {
     t = t->next;
   }
   return null_item;
+}
+
+template <typename T, typename Key>
+iterator HashTable<T, Key>::insert(T value) {
+  int h = hash(item.key(), size);
+  hashTable[h].push_front(value);
+  return hashTable[h].begin();
+  /*
+  Link t = new Node(item);
+  t->next = ht[h];
+  ht[h] = t;
+  */
 }
 
 template <class Item, Key>
