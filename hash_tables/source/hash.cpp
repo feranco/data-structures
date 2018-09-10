@@ -1,7 +1,7 @@
 #include "hash.h"
 
-
-int hash (char* s, int n) {
+/*
+unsigned int hash (char* s, unsigned int n) {
   int h = 0;
   const int m = 127;
   for (; *s != 0; s++) {
@@ -9,8 +9,9 @@ int hash (char* s, int n) {
   }
   return h;
 }
+*/
 
-int hash (string s, int n) {
+unsigned int hash (string s, unsigned int n) {
   int h = 0;
   const int m = 127;
   for (char c : s) {

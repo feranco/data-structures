@@ -1,6 +1,11 @@
+#ifndef HASH_H
+#define HASH_H
+
 #include <string>
 
 using std::string;
 
-int hash (char* s, int n);
-int hash (string s, int n);
+//unsigned int hash (char* s, unsigned int n);
+unsigned int hash (string s, unsigned int n);
+
+#endif

@@ -1,75 +1,58 @@
+#include <algorithm>
+#include <functional>
 #include <list>
+#include <utility>
 #include <vector>
 
+using std::find;
 using std::list;
+using std::pair;
 using std::vector;
 
 template <typename Key, typename T>
 class HashTable {
-  typedef pair<const Key, T> valueType;
+  //typedef pair<const Key, T> valueType;
+  using valueType =  pair<const Key, T>;
   vector<list<valueType>> hashTable;
   size_t size = 0;
-/*
-  struct Node {
-    Item item;
-    Node *next;
-    Node (Item x): item(x), next(0){};
-  };
 
-  typedef Node* Link;
-  Link* ht;
-  int size;
-*/
  public:
-  typedef HashTable::iterator iterator;
-  iterator begin() noexcept { return hashTable.begin(); }
-  inline iterator end() noexcept { return hashTable.end(); }
+  //typedef typename std::list<valueType> array_type;
+  //typedef typename x std::list<valueType>::iterator iterator;
+  using hashFunction = std::function<unsigned int(Key, unsigned int)>;
+  hashFunction hash;
+  using iterator =  typename std::list<valueType>::iterator;
+  iterator begin() noexcept { return hashTable[0].begin(); }
+  inline iterator end() noexcept { return hashTable[0].end(); }
   
   HashTable () {}
-  HashTable (size_t n);
-  Item search(Key k);
-  iterator insert(k, T value);
-  //void insert(Key k, T value);
+  HashTable (hashFunction hf) : hash(hf){}
+  
+  HashTable (unsigned int n);
+  iterator search(const Key& k) const;
+  iterator insert(Key k, T value);
+  void delete (iterator it);
+
 };
 
-template <typename Item, typename Key>
-HashTable<T,Key>::HashTable(unsigned int size) {
+template <typename Key, typename T>
+  HashTable<Key,T>::HashTable(unsigned int size) {
   hashTable.resize(size);
-/*
-  size = n;
-  ht = new Link[n];
-  for (int i = 0; i < n; ++i) ht[i] = 0;
-  */
+  this->size = size;
 }
 
-template <typename T, typename Key>
-T HashTable<Item, Key>::search(Key k) {
+
+template <typename Key, typename T>
+typename HashTable<Key,T>::iterator  HashTable<Key,T>::search(const Key& k) const {
   int h = hash(k, size);
-  Link t = ht[h];
-  while (!t) {
-    if (t->item.key() == k) return t->item;
-    t = t->next;
-  }
-  return null_item;
+  return find(hashTable[h].begin(), hashTable[h].end());
 }
 
-template <typename T, typename Key>
-iterator HashTable<T, Key>::insert(T value) {
-  int h = hash(item.key(), size);
+template <typename Key, typename T>
+  typename HashTable<Key,T>::iterator HashTable<Key,T>::insert(Key k, T value) {
+  int h = hash(k, size);
   hashTable[h].push_front(value);
+  size++;
   return hashTable[h].begin();
-  /*
-  Link t = new Node(item);
-  t->next = ht[h];
-  ht[h] = t;
-  */
-}
-
-template <class Item, Key>
-void HashTable<Item, Key>::insert(Item item) {
-  int h = hash(item.key(), size);
-  Link t = new Node(item);
-  t->next = ht[h];
-  ht[h] = t;
 }
 
