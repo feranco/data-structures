@@ -1,7 +1,7 @@
 #include "list_hash_table.h"
 #include <iostream>
 #include <string>
-#include "hash.h"
+//#include "hash.h"
 
 using std::string;
 
@@ -9,7 +9,7 @@ using std::string;
 
 int main(int argc, char* argv[])
 {
-  HashTable<string,int> ht(hash);
+  HashTable<string,int> ht(100);
   /*
   string s1 = "pippo";
   string s2 = "fernando";
