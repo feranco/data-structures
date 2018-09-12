@@ -3,7 +3,7 @@
 #include <list>
 #include <utility>
 #include <vector>
-
+#include <iostream>
 using std::find;
 using std::list;
 using std::pair;
@@ -15,6 +15,7 @@ class HashTable {
   using valueType =  pair<const Key, T>;
   vector<list<valueType>> hashTable;
   size_t size = 0;
+  Hash hashFunct;
 
  public:
   //typedef typename std::list<valueType> array_type;
@@ -29,7 +30,7 @@ class HashTable {
   //HashTable (hashFunction hf) : hash(hf){}
   
   HashTable (unsigned int n);
-  iterator search(const Key& k) const;
+  iterator search(const Key& k) ;
   iterator insert(Key k, T value);
   //void delete (iterator it);
 
@@ -43,16 +44,22 @@ template <typename Key, typename T, typename Hash>
 
 
 template <typename Key, typename T, typename Hash>
-  typename HashTable<Key, T, Hash>::iterator  HashTable<Key,T, Hash>::search(const Key& k) const {
-  int h = hash(k);
-  return find(hashTable[h].begin(), hashTable[h].end());
+  typename HashTable<Key, T, Hash>::iterator  HashTable<Key,T, Hash>::search(const Key& k)  {
+  auto h =  hashFunct(k);//Hash<T>(k);
+  h = h%size;
+  auto lambda = [&](valueType x){return x.first == k;}; 
+  auto it =  find_if(hashTable[h].begin(), hashTable[h].end(),lambda);
+  std::cout << "search: " << it->first << std::endl;
+  return (hashTable[h].begin());
 }
 
 template <typename Key, typename T, typename Hash>
   typename HashTable<Key,T, Hash>::iterator HashTable<Key,T, Hash>::insert(Key k, T value) {
-  int h = hash(k);
-  hashTable[h].push_front(value);
-  size++;
+  auto h = hashFunct(k);
+  h = h%size;
+  std::cout << h << std::endl;
+  hashTable[h].push_front(std::make_pair(k,value));
+  //size++;
   return hashTable[h].begin();
 }
 
