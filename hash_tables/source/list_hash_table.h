@@ -30,9 +30,9 @@ class HashTable {
   //HashTable (hashFunction hf) : hash(hf){}
   
   HashTable (unsigned int n);
-  iterator search(const Key& k) ;
-  iterator insert(Key k, T value);
-  //void delete (iterator it);
+  iterator search (const Key& k);
+  iterator insert (Key k, T value);
+  void remove (iterator it);
 
 };
 
@@ -63,3 +63,14 @@ template <typename Key, typename T, typename Hash>
   return hashTable[h].begin();
 }
 
+/// Erase an element using an iterator.
+/// return false if element was not found.
+
+template <typename Key, typename T, typename Hash>
+void HashTable<Key,T, Hash>::remove(typename HashTable<Key,T, Hash>::iterator it) {
+   auto h = hashFunct(it->first);
+   h = h%size;
+   hashTable[h].erase(it);
+}
+
+OVFQEI
