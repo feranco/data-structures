@@ -11,7 +11,7 @@ using std::vector;
 
 template <typename Key, typename T, typename Hash = std::hash<Key>>
 class HashTable {
-  //typedef pair<const Key, T> valueType;
+ 
   using valueType =  pair<const Key, T>;
   vector<list<valueType>> hashTable;
   size_t size = 0;
@@ -22,10 +22,36 @@ class HashTable {
   //typedef typename x std::list<valueType>::iterator iterator;
   //using hashFunction = std::function<unsigned int(Key, unsigned int)>;
   //hashFunction hash;
-  using iterator =  typename std::list<valueType>::iterator;
-  iterator begin() noexcept { return hashTable[0].begin(); }
-  inline iterator end() noexcept { return hashTable[0].end(); }
+
+  //Custom iterator for the HashTable
+  class iterator {
+  public:
+    //Define iterator traits
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type   = size_t;
+    using value_type        = valueType;
+    using pointer           = value_type*;
+    using reference         = value_type&;
+
+    //Constructor
+    iterator() { };
+    
+  private:
+    void goto_next_element()
+    {
+      DCHECK_LT_F(_bucket, _map->_num_buckets);
+      do {
+	_bucket++;
+      } while (_bucket < _map->_num_buckets && _map->_states[_bucket] != State::FILLED);
+    }
+
+  };
   
+
+  
+  using iterator =  typename std::list<valueType>::iterator;
+    iterator begin() noexcept { return hashTable[0].begin(); }
+    inline iterator end() noexcept { return hashTable[0].end(); }
   HashTable () {}
   //HashTable (hashFunction hf) : hash(hf){}
   
@@ -73,4 +99,4 @@ void HashTable<Key,T, Hash>::remove(typename HashTable<Key,T, Hash>::iterator it
    hashTable[h].erase(it);
 }
 
-OVFQEI
+//OVFQEI
