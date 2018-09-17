@@ -1,3 +1,4 @@
+#if 1
 #include "list_hash_table.h"
 #include <iostream>
 #include <string>
@@ -36,13 +37,25 @@ int main(int argc, char* argv[])
   const auto integer_keys  = integerKeys();
   const auto string_keys    = generateKeys("", integer_keys, "");
   HashTable<string,int> ht(100);
+  
   for (int i = 0; i < integer_keys.size(); ++i) {
     auto it = ht.insert(string_keys[i], integer_keys[i]);
     std::cout << it->first << std::endl;
   }
 
- ht.search(string_keys[5]);
+  ht.search(string_keys[5]);
   // std::cout << it->first << std::endl;
 }
-
+#else
+#include <unordered_map>
+#include <iostream>
+using namespace std;
+int main(int argc, char* argv[])
+{
+  unordered_map<string,int> map( {{"apple",2},{"lemon",3}} );
+  for (auto it = map.begin(); it != map.end(); ++it) {
+    cout << (*it).first << endl;
+  }
+}
+#endif
 

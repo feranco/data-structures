@@ -36,25 +36,47 @@ class HashTable {
     using pointer           = value_type*;
     using reference         = value_type&;
 
-    using listIterator =  typename std::list<valueType>::iterator;
+    template <typename TT>
+    using listIterator =  typename std::list<TT>::iterator;
 
+    
     //Constructor
     iterator() { };
-    iterator (HashTableType* ht, listIterator it) : hashTable(ht), lIt(it) {};
-
+    iterator (HashTableType* ht, listIterator<valueType> it) : hashTableIt(ht), lIt(it) {};
+    
     iterator& operator++()
     {
       this->goToNextElement();
       return *this;
-    };
-    /*
-      iterator operator++(int)
-      {
-      size_t old_index = _bucket;
+    }
+    
+    iterator operator++(int)
+    {
       this->goto_next_element();
-      return iterator(_map, old_index);
-      };
-    */  
+      return iterator(hashTableIt, lIt);
+    }
+    
+
+    reference operator*()
+    {
+      return *lIt;
+    }
+
+    pointer operator->()
+    {
+      return lIt;
+    }
+
+    bool operator==(const iterator& rhs) const
+    {
+      return lIt == rhs.lIt;
+    }
+
+    bool operator!=(const iterator& rhs) const
+    {
+      return lIt != rhs.lIt;
+    }
+
     
   private:
     void goToNextElement()
@@ -68,19 +90,18 @@ class HashTable {
       }
 
       for (size_t i = h; i < this->bucketSize(); ++i) {
-	auto it = bucket.begin();
-	if (it != bucket.end()) {
+	auto it = this->hashTable[h].begin();
+	if (it != this->hashTable[h].end()) {
 	  return it;
 	}	  
       }
-      return iterator(this, hashTable[bucketSize-1].end());
+      return iterator(hashTableIt, hashTableIt->hashTable[hashTableIt->bucketSize-1].end());
     }
-
-    };
-
+    
   public:
-    HashTableType* hashTable;
-    listIterator lIt;
+    HashTableType* hashTableIt;
+    listIterator<valueType> lIt;
+    
   };
 
   iterator begin()
@@ -100,11 +121,11 @@ class HashTable {
   }
   
 
-  
+/*  
   using iterator =  typename std::list<valueType>::iterator;
   iterator begin() noexcept { return hashTable[0].begin(); }
   inline iterator end() noexcept { return hashTable[0].end(); }
-  
+*/ 
   HashTable () {}
   //HashTable (hashFunction hf) : hash(hf){}
   
@@ -129,7 +150,7 @@ template <typename Key, typename T, typename Hash>
   auto lambda = [&](valueType x){return x.first == k;}; 
   auto it =  find_if(hashTable[h].begin(), hashTable[h].end(),lambda);
   std::cout << "search: " << it->first << std::endl;
-  return (hashTable[h].begin());
+  return iterator(this, hashTable[h].begin());
 }
 
 template <typename Key, typename T, typename Hash>
@@ -139,7 +160,7 @@ template <typename Key, typename T, typename Hash>
   std::cout << h << std::endl;
   hashTable[h].push_front(std::make_pair(k,value));
   size++;
-  return hashTable[h].begin();
+  return iterator(this, hashTable[h].begin());
 }
 
 /// Erase an element using an iterator.
