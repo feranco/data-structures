@@ -1,4 +1,5 @@
 #if 1
+#include "hash.h"
 #include "list_hash_table.h"
 #include <iostream>
 #include <string>
@@ -40,7 +41,7 @@ int main(int argc, char* argv[])
   
   for (int i = 0; i < integer_keys.size(); ++i) {
     auto it = ht.insert(string_keys[i], integer_keys[i]);
-    std::cout << it->first << std::endl;
+    std::cout << (*it).first << it->first << std::endl;
   }
 
   ht.search(string_keys[5]);
