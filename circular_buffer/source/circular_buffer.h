@@ -1,7 +1,12 @@
+#include <cstdio>
+
+#include <memory>
+#include <mutex>
+
 template <class T>
-class circular_buffer {
+class circularBuffer {
 public:
-  explicit circular_buffer(size_t size) :
+  explicit circularBuffer(size_t size) :
   buf_(std::unique_ptr<T[]>(new T[size])),
       max_size_(size)
   {
