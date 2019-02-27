@@ -6,8 +6,8 @@
 template <class T>
 class circularBuffer {
 public:
-  explicit circularBuffer(size_t size) :
-  buf_(std::unique_ptr<T[]>(new T[size])),
+  circularBuffer(size_t size) :
+  data(std::unique_ptr<T[]>(new T[size])),
       max_size_(size)
   {
 
@@ -17,7 +17,7 @@ public:
   {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    buf_[head_] = item;
+    data[head_] = item;
 
     if(full_)
     {
@@ -39,7 +39,7 @@ public:
     }
 
     //Read data and advance the tail (we now have a free space)
-    auto val = buf_[tail_];
+    auto val = data[tail_];
     full_ = false;
     tail_ = (tail_ + 1) % max_size_;
 
@@ -91,7 +91,7 @@ public:
 
 private:
   std::mutex mutex_;
-  std::unique_ptr<T[]> buf_;
+  std::unique_ptr<T[]> data;
   size_t head_ = 0;
   size_t tail_ = 0;
   const size_t max_size_;
