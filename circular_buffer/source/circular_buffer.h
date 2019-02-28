@@ -1,99 +1,102 @@
 #include <cstdio>
-
 #include <memory>
 #include <mutex>
 
 template <class T>
-class circularBuffer {
+class ringBuffer {
 public:
-  circularBuffer(size_t size) :
-  data(std::unique_ptr<T[]>(new T[size])),
-      max_size_(size)
+  ringBuffer(size_t size) :
+      mData(std::unique_ptr<T>(static_cast<T*>(new (size*sizeof(T))))),
+      mSize(size)
   {
 
   }
-
+#if 0
   void put(T item)
   {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mMutex);
 
-    data[head_] = item;
+    mData[mHead] = item;
 
-    if(full_)
+    new(_data + _size) T(t);
+++size;
+
+    if(mFull)
     {
-      tail_ = (tail_ + 1) % max_size_;
+      mTail = (mTail + 1) % mSize;
     }
 
-    head_ = (head_ + 1) % max_size_;
+    mHead = (mHead + 1) % mSize;
 
-    full_ = head_ == tail_;
+    mFull = mHead == mTail;
   }
 
   T get()
   {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mMutex);
 
     if(empty())
     {
       return T();
     }
 
-    //Read data and advance the tail (we now have a free space)
-    auto val = data[tail_];
-    full_ = false;
-    tail_ = (tail_ + 1) % max_size_;
+    //Read mData and advance the tail (we now have a free space)
+    auto val = mData[mTail];
+    mFull = false;
+    mTail = (mTail + 1) % mSize;
 
     return val;
   }
 
   void reset()
   {
-    std::lock_guard<std::mutex> lock(mutex_);
-    head_ = tail_;
-    full_ = false;
+    std::lock_guard<std::mutex> lock(mMutex);
+    mHead = mTail;
+    mFull = false;
   }
 
   bool empty() const
   {
     //if head and tail are equal, we are empty
-    return (!full_ && (head_ == tail_));
+    return (!mFull && (mHead == mTail));
   }
 
   bool full() const
   {
     //If tail is ahead the head by 1, we are full
-    return full_;
+    return mFull;
   }
 
   size_t capacity() const
   {
-    return max_size_;
+    return mSize;
   }
 
   size_t size() const
   {
-    size_t size = max_size_;
+    size_t size = mSize;
 
-    if(!full_)
+    if(!mFull)
     {
-      if(head_ >= tail_)
+      if(mHead >= mTail)
       {
-        size = head_ - tail_;
+        size = mHead - mTail;
       }
       else
       {
-        size = max_size_ + head_ - tail_;
+        size = mSize + mHead - mTail;
       }
     }
 
     return size;
   }
-
+#endif
 private:
-  std::mutex mutex_;
-  std::unique_ptr<T[]> data;
-  size_t head_ = 0;
-  size_t tail_ = 0;
-  const size_t max_size_;
-  bool full_ = 0;
+  std::mutex mMutex;
+  //std::unique_ptr<T> mData;
+  T* mData;
+  size_t mHead = 0;
+  size_t mTail = 0;
+  const size_t mSize;
+  bool mFull = 0;
 };
