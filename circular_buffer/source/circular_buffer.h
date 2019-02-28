@@ -6,7 +6,7 @@ template <class T>
 class ringBuffer {
 public:
   ringBuffer(size_t size) :
-      mData(std::unique_ptr<T>(static_cast<T*>(new (size*sizeof(T))))),
+      mData(std::unique_ptr<T>(static_cast<T*>(operator new (size*sizeof(T))))),
       mSize(size)
   {
 
@@ -93,8 +93,8 @@ public:
 #endif
 private:
   std::mutex mMutex;
-  //std::unique_ptr<T> mData;
-  T* mData;
+  std::unique_ptr<T> mData;
+  // T* mData;
   size_t mHead = 0;
   size_t mTail = 0;
   const size_t mSize;

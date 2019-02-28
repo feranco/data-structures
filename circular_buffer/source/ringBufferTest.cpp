@@ -1,5 +1,5 @@
 #include "circular_buffer.h"
 
 int main (void) {
-  ringBuffer rb (5);
+  ringBuffer<int> rb (5);
 }
