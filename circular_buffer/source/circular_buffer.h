@@ -6,10 +6,22 @@ template <class T>
 class RingBuffer {
  public:
   RingBuffer(size_t size) :
-      mData(std::unique_ptr<T[]>(static_cast<T*>(operator new (((size+1)*sizeof(T)))))),
-      mCapacity(size)
+      mCapacity(size),
+      mData(std::unique_ptr<T[]>(static_cast<T*>(operator new (((size+1)*sizeof(T))))))
   {
 
+  }
+
+  RingBuffer(const RingBuffer& src) : mHead(src.mHead), mTail(src.mTail), mCapacity(src.mCapacity),
+                                      mData(std::unique_ptr<T[]>(static_cast<T*>(operator new (((src.mCapacity)*sizeof(T))))))
+  {
+    std::cout << "CC called\n";
+    //call move assignment operator try after it is defined
+    //mData = std::make_unique<T[]>(static_cast<T*>(operator new (((mCapacity)*sizeof(T)))));
+    for (std::size_t i = mHead; i != mTail; i = (i+1) % mCapacity)
+    {
+      new (mData.get()+i) T(src.mData[i]);
+    }
   }
 
   bool empty() const
@@ -89,9 +101,8 @@ class RingBuffer {
 #endif
  private:
   std::mutex mMutex;
-  std::unique_ptr<T[]> mData;
-  size_t mSize = 0;
   size_t mHead = 0;
   size_t mTail = 0;
   const size_t mCapacity;
+  std::unique_ptr<T[]> mData;
 };

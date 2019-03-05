@@ -33,12 +33,39 @@ TEST(RingBufferTest, testPutAndGet) {
   RingBuffer<double> rb (capacity);
   ASSERT_EQ(true, rb.empty());
   for (size_t i = 0; i < capacity; ++i) {
-    rb.put(val);
+      rb.put(val);
       ASSERT_EQ(false, rb.empty());
   }
 
+    for (size_t i = 0; i < capacity; ++i) {
+    //   ASSERT_EQ(rb.get(),val+i);
+    std::cout << rb.get() << " ";
+  }
+
+
   ASSERT_EQ(true, rb.full());
 }
+#if 0
+TEST(RingBufferTest, testCopyConstructor) {
+  const int val = 12;
+  const size_t capacity = 5;
+  RingBuffer<int> rb (capacity);
+
+  for (size_t i = 0; i < capacity; ++i) {
+    rb.put(val+i);
+  }
+
+  RingBuffer<int> rbCopy = rb;
+
+  for (size_t i = 0; i < capacity; ++i) {
+    //   ASSERT_EQ(rb.get(),val+i);
+    std::cout << rbCopy.get() << " ";
+  }
+
+}
+#endif
+
+
 
 int main (int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
