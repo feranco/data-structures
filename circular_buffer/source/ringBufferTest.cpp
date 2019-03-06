@@ -7,7 +7,18 @@ TEST(RingBufferTest, testEmpty) {
 }
 
 TEST(RingBufferTest, testFull) {
+  const int val = 12;
   RingBuffer<int> rb (5);
+  ASSERT_EQ(false, rb.full());
+
+  for (size_t i = 0; i < 5; ++i) {
+    rb.put(val+i);
+  }
+
+  ASSERT_EQ(true, rb.full());
+  rb.put(100);
+  ASSERT_EQ(true, rb.full());
+  rb.get();
   ASSERT_EQ(false, rb.full());
 }
 
@@ -30,22 +41,15 @@ TEST(RingBufferTest, testGet) {
 TEST(RingBufferTest, testPutAndGet) {
   const int val = 12;
   const size_t capacity = 5;
-  RingBuffer<double> rb (capacity);
+  RingBuffer<int> rb (capacity);
   ASSERT_EQ(true, rb.empty());
   for (size_t i = 0; i < capacity; ++i) {
-      rb.put(val);
-      ASSERT_EQ(false, rb.empty());
+    ASSERT_EQ(false, rb.full());
+    rb.put(val+i);
   }
-
-    for (size_t i = 0; i < capacity; ++i) {
-    //   ASSERT_EQ(rb.get(),val+i);
-    std::cout << rb.get() << " ";
-  }
-
-
   ASSERT_EQ(true, rb.full());
 }
-#if 0
+
 TEST(RingBufferTest, testCopyConstructor) {
   const int val = 12;
   const size_t capacity = 5;
@@ -58,14 +62,9 @@ TEST(RingBufferTest, testCopyConstructor) {
   RingBuffer<int> rbCopy = rb;
 
   for (size_t i = 0; i < capacity; ++i) {
-    //   ASSERT_EQ(rb.get(),val+i);
-    std::cout << rbCopy.get() << " ";
+    ASSERT_EQ(rbCopy.get(),val+i);
   }
-
 }
-#endif
-
-
 
 int main (int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

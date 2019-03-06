@@ -6,16 +6,15 @@ template <class T>
 class RingBuffer {
  public:
   RingBuffer(size_t size) :
-      mCapacity(size),
+      mCapacity(size+1),
       mData(std::unique_ptr<T[]>(static_cast<T*>(operator new (((size+1)*sizeof(T))))))
   {
 
   }
 
-  RingBuffer(const RingBuffer& src) : mHead(src.mHead), mTail(src.mTail), mCapacity(src.mCapacity),
+  RingBuffer(const RingBuffer& src) : mHead(src.mHead), mTail(src.mTail), mCapacity(src.mCapacity+1),
                                       mData(std::unique_ptr<T[]>(static_cast<T*>(operator new (((src.mCapacity)*sizeof(T))))))
   {
-    std::cout << "CC called\n";
     //call move assignment operator try after it is defined
     //mData = std::make_unique<T[]>(static_cast<T*>(operator new (((mCapacity)*sizeof(T)))));
     for (std::size_t i = mHead; i != mTail; i = (i+1) % mCapacity)
@@ -39,17 +38,9 @@ class RingBuffer {
   void put(const T& item)
   {
     std::lock_guard<std::mutex> lock(mMutex);
-
-    if (full()) {
-      new(mData.get() + mHead) T(item);
-      mTail = mHead;
-      mHead = (mHead+1) % mCapacity;
-    }
-    else {
-      new(mData.get() + mTail) T(item);
-      mTail = (mTail+1) % mCapacity;
-    }
-
+    if (full()) mHead = (mHead+1) % mCapacity;
+    new(mData.get() + mTail) T(item);
+    mTail = (mTail+1) % mCapacity;
   }
 
   T get()
@@ -61,7 +52,7 @@ class RingBuffer {
       return T();
     }
 
-    //Read mData and advance the tail (we now have a free space)
+    //Read mData and advance the head
     auto ret = mData[mHead];
     mData[mHead].~T();
     mHead = (mHead+1) % mCapacity;
