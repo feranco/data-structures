@@ -23,6 +23,32 @@ class RingBuffer {
     }
   }
 
+  RingBuffer& operator= (const RingBuffer& rhs) {
+    std::cout << "Assignment\n";
+    if (this == &rhs) return *this;
+
+    for (std::size_t i = mHead; i != mTail; i = (i+1) % mCapacity)
+    {
+      mData[i].~T();
+    }
+
+    mData.reset(static_cast<T*>(operator new (((rhs.mCapacity)*sizeof(T)))));
+
+    mCapacity = rhs.mCapacity;
+    mHead = rhs.mHead;
+    mTail = rhs.mTail;
+
+    // Constuct a copy of rhs
+    for (std::size_t i = mHead; i != mTail; i = (i + 1) % mCapacity)
+    {
+      new (mData.get()+i) T(rhs.mData[i]);
+    }
+
+    return *this;
+  }
+
+
+
   bool empty() const
   {
     //if head and tail are equal the container is empty
@@ -94,6 +120,6 @@ class RingBuffer {
   std::mutex mMutex;
   size_t mHead = 0;
   size_t mTail = 0;
-  const size_t mCapacity;
+  size_t mCapacity;
   std::unique_ptr<T[]> mData;
 };

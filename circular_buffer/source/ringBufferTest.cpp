@@ -66,6 +66,23 @@ TEST(RingBufferTest, testCopyConstructor) {
   }
 }
 
+TEST(RingBufferTest, testAssignment) {
+  const int val = 12;
+  const size_t capacity = 5;
+  RingBuffer<int> rb (capacity);
+
+  for (size_t i = 0; i < capacity; ++i) {
+    rb.put(val+i);
+  }
+
+  RingBuffer<int> rbCopy(capacity*2);
+  rbCopy = rb;
+
+  for (size_t i = 0; i < capacity; ++i) {
+    ASSERT_EQ(rbCopy.get(),val+i);
+  }
+}
+
 int main (int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
