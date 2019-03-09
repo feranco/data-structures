@@ -12,7 +12,7 @@ class RingBuffer {
 
   }
 
-  RingBuffer(const RingBuffer& src) : mHead(src.mHead), mTail(src.mTail), mCapacity(src.mCapacity+1),
+  RingBuffer(const RingBuffer& src) : mHead(src.mHead), mTail(src.mTail), mCapacity(src.mCapacity),
                                       mData(std::unique_ptr<T[]>(static_cast<T*>(operator new (((src.mCapacity)*sizeof(T))))))
   {
     //call move assignment operator try after it is defined
@@ -24,7 +24,7 @@ class RingBuffer {
   }
 
   RingBuffer& operator= (const RingBuffer& rhs) {
-    std::cout << "Assignment\n";
+
     if (this == &rhs) return *this;
 
     for (std::size_t i = mHead; i != mTail; i = (i+1) % mCapacity)
@@ -47,7 +47,23 @@ class RingBuffer {
     return *this;
   }
 
+  RingBuffer(RingBuffer&& rhs)
+      : mHead(rhs.mHead), mTail(rhs.mTail), mCapacity(rhs.mCapacity), mData(std::move(rhs.mData))
+  {
 
+  }
+
+  RingBuffer& operator =(RingBuffer&& rhs)
+  {
+
+    if (&rhs != this)
+    {
+      mHead = rhs.mHead;
+      mTail = rhs.mTail;
+      mData = std::move(rhs.mData);
+    }
+    return *this;
+  }
 
   bool empty() const
   {
@@ -84,13 +100,6 @@ class RingBuffer {
     mHead = (mHead+1) % mCapacity;
     return ret;
   }
-#if 0
-  void reset()
-  {
-    std::lock_guard<std::mutex> lock(mMutex);
-    mHead = mTail;
-    mFull = false;
-  }
 
   size_t capacity() const
   {
@@ -99,23 +108,10 @@ class RingBuffer {
 
   size_t size() const
   {
-    size_t size = mCapacity;
+    return (mTail >= mHead) ? (mTail - mHead) : (mCapacity - mHead + mTail);
 
-    if(!mFull)
-    {
-      if(mHead >= mTail)
-      {
-        size = mHead - mTail;
-      }
-      else
-      {
-        size = mCapacity + mHead - mTail;
-      }
-    }
-
-    return size;
   }
-#endif
+
  private:
   std::mutex mMutex;
   size_t mHead = 0;

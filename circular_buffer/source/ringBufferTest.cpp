@@ -59,7 +59,7 @@ TEST(RingBufferTest, testCopyConstructor) {
     rb.put(val+i);
   }
 
-  RingBuffer<int> rbCopy = rb;
+  RingBuffer<int> rbCopy = rb; //same as RingBuffer<int> rbCopy(rb);
 
   for (size_t i = 0; i < capacity; ++i) {
     ASSERT_EQ(rbCopy.get(),val+i);
@@ -81,6 +81,54 @@ TEST(RingBufferTest, testAssignment) {
   for (size_t i = 0; i < capacity; ++i) {
     ASSERT_EQ(rbCopy.get(),val+i);
   }
+}
+
+TEST(RingBufferTest, testMoveConstructor) {
+  const int val = 12;
+  const size_t capacity = 5;
+  RingBuffer<int> rb (capacity);
+
+  for (size_t i = 0; i < capacity; ++i) {
+    rb.put(val+i);
+  }
+
+  RingBuffer<int> rbCopy(std::move(rb));
+
+  for (size_t i = 0; i < capacity; ++i) {
+    ASSERT_EQ(rbCopy.get(),val+i);
+  }
+}
+
+TEST(RingBufferTest, testMoveAssignment) {
+  const int val = 12;
+  const size_t capacity = 5;
+  RingBuffer<int> rb (capacity);
+
+  for (size_t i = 0; i < capacity; ++i) {
+    rb.put(val+i);
+  }
+
+  RingBuffer<int> rbCopy(10);
+  rbCopy = std::move(rb);
+
+  for (size_t i = 0; i < capacity; ++i) {
+    ASSERT_EQ(rbCopy.get(),val+i);
+  }
+}
+
+TEST(RingBufferTest, testSize) {
+  const int val = 12;
+  const size_t capacity = 5;
+  RingBuffer<int> rb (capacity);
+
+  for (size_t i = 0; i < capacity; ++i) {
+    ASSERT_EQ(rb.size(), i);
+    rb.put(val+i);
+  }
+
+  ASSERT_EQ(rb.size(), capacity);
+  rb.put(val);
+  ASSERT_EQ(rb.size(), capacity);
 }
 
 int main (int argc, char **argv) {
