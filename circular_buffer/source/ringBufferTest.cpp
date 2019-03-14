@@ -1,4 +1,4 @@
-#include "circular_buffer.h"
+#include "ringBuffer.h"
 #include <gtest/gtest.h>
 
 TEST(RingBufferTest, testEmpty) {
