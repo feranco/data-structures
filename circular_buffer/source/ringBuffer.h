@@ -1,14 +1,19 @@
-#include <cstdio>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <iostream>
 
 template <class T>
 class RingBuffer {
+
+  using DataPtr = std::unique_ptr<T[], std::function<void(T*)>>;
+
  public:
+
   RingBuffer(size_t size) :
       mCapacity(size+1),
-      mData(std::unique_ptr<T[]>(static_cast<T*>(operator new (((size+1)*sizeof(T))))))
+      mData(static_cast<T*>(operator new ((size+1)*sizeof(T))), deleter)
+      //mData(reinterpret_cast<T*>(new char[(size+1)*sizeof(T)]), deleter)
   {
 
   }
@@ -25,11 +30,11 @@ class RingBuffer {
     }
   }
 
+
   RingBuffer(const RingBuffer& src) : mHead(src.mHead), mTail(src.mTail), mCapacity(src.mCapacity),
-                                      mData(std::unique_ptr<T[]>(static_cast<T*>(operator new (((src.mCapacity)*sizeof(T))))))
+                                      mData(static_cast<T*>(operator new ((src.mCapacity)*sizeof(T))), deleter)
+                                      //mData(reinterpret_cast<T*>(new char[(src.mCapacity)*sizeof(T)]), deleter)
   {
-    //call move assignment operator try after it is defined
-    //mData = std::make_unique<T[]>(static_cast<T*>(operator new (((mCapacity)*sizeof(T)))));
     for (std::size_t i = mHead; i != mTail; i = (i+1) % mCapacity)
     {
       new (mData.get()+i) T(src.mData[i]);
@@ -45,7 +50,7 @@ class RingBuffer {
       mData[i].~T();
     }
 
-    mData.reset(static_cast<T*>(operator new (((rhs.mCapacity)*sizeof(T)))));
+    mData.reset(reinterpret_cast<T*>(new char[(rhs.mCapacity)*sizeof(T)]));
 
     mCapacity = rhs.mCapacity;
     mHead = rhs.mHead;
@@ -130,5 +135,9 @@ class RingBuffer {
   size_t mHead = 0;
   size_t mTail = 0;
   size_t mCapacity;
-  std::unique_ptr<T[]> mData;
+  std::function<void(T*)> deleter = [](T *m){
+                                      operator delete(m);
+                                      //delete[] reinterpret_cast<char*>(m);
+                                    };
+  DataPtr mData;
 };

@@ -1,5 +1,6 @@
 #include "ringBuffer.h"
 #include <gtest/gtest.h>
+#include <string>
 
 TEST(RingBufferTest, testEmpty) {
   RingBuffer<int> rb (5);
@@ -131,8 +132,17 @@ TEST(RingBufferTest, testSize) {
   ASSERT_EQ(rb.size(), capacity);
 }
 
+TEST(RingBufferTest, testWithString) {
+
+  RingBuffer<std::string> rb(5);
+
+  for (size_t i = 0; i < 4; ++i) {
+    rb.put("abc");
+  }
+}
+
+
 int main (int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
-
 }
