@@ -1,7 +1,6 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <iostream>
 
 template <class T>
 class RingBuffer {
@@ -13,7 +12,6 @@ class RingBuffer {
   RingBuffer(size_t size) :
       mCapacity(size+1),
       mData(static_cast<T*>(operator new ((size+1)*sizeof(T))), deleter)
-      //mData(reinterpret_cast<T*>(new char[(size+1)*sizeof(T)]), deleter)
   {
 
   }
@@ -33,7 +31,6 @@ class RingBuffer {
 
   RingBuffer(const RingBuffer& src) : mHead(src.mHead), mTail(src.mTail), mCapacity(src.mCapacity),
                                       mData(static_cast<T*>(operator new ((src.mCapacity)*sizeof(T))), deleter)
-                                      //mData(reinterpret_cast<T*>(new char[(src.mCapacity)*sizeof(T)]), deleter)
   {
     for (std::size_t i = mHead; i != mTail; i = (i+1) % mCapacity)
     {
@@ -135,9 +132,6 @@ class RingBuffer {
   size_t mHead = 0;
   size_t mTail = 0;
   size_t mCapacity;
-  std::function<void(T*)> deleter = [](T *m){
-                                      operator delete(m);
-                                      //delete[] reinterpret_cast<char*>(m);
-                                    };
+  std::function<void(T*)> deleter = [](T *m){operator delete(m);};
   DataPtr mData;
 };
